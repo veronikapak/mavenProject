@@ -1,5 +1,6 @@
 package com.company;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
@@ -45,8 +46,6 @@ public class App2 {
         }
     }
 
-
-
     private static List<User> getUsersFromJson(String json) throws IOException {
         return objectMapper.readValue(json, new TypeReference<List<User>>(){});
     }
@@ -63,9 +62,11 @@ public class App2 {
 
             for (Field f:fields) {
                 f.setAccessible(true);
-                System.out.println(f.getName());
-                str = bufferedReader.readLine();
-                f.set(user, str);
+                if(f.getAnnotation(JsonIgnore.class)==null){
+                    System.out.println(f.getName());
+                    str = bufferedReader.readLine();
+                    f.set(user, str);
+                }
             }
 
         try {

@@ -16,23 +16,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Hello world!
- *
- */
 public class App {
 
     private static final String FILENAME = "C:\\java\\maven-project\\users.txt";
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static void main( String[] args ) throws IOException, IllegalAccessException {
-        /*ObjectMapper mapper = new ObjectMapper();
-        User user = new User("admin", "password1234");
-        String json = mapper.writeValueAsString(user);
-        System.out.println(json);
-
-        User deserializedUser = mapper.readValue(json, User.class);
-        System.out.println( deserializedUser.getUserName());*/
 
         writeUser();
 
@@ -48,40 +37,39 @@ public class App {
         boolean flag = true;
 
         if(file.exists()) {
-            String strings = getFileContent();
-            listUsers = getUsersFromJson(strings);
+            listUsers = getUsersFromJson(getFileContent());
         }
 
             while (flag){
             user = new User();
             System.out.println("If you want to quit enter exit.");
             fields = User.class.getDeclaredFields();
+
             for (Field f:fields) {
                 f.setAccessible(true);
-                System.out.println(f.getName());
+                System.out.println(Validator.getFieldName(f));
                 str = reader.readLine();
+                Validator.validate(str, f);
                 if(str.equalsIgnoreCase("exit")) {
-                    flag=false;
-                    break;
+                    return;
+
                 }
                 f.set(user, str);
             }
-            if (flag){
-                //checkUserName(user);
+
                 ArrayList<User> listTempo = new ArrayList<User>(listUsers) ;
                 boolean isExist=false;
                 for (User u : listTempo) {
-                    if (user.getUserName().equals(u.getUserName()))
-                    {
+                    if (user.getUserName().equals(u.getUserName())) {
                         System.out.println("This username is already exists. Try again.");
                         isExist=true;
                     }
                 }
                 if (!isExist){
                     listUsers.add(user);
+                    writeToFile(getJson(listUsers));
                 }
             }
-        }
 
         try {
             if(reader!=null) {
@@ -90,20 +78,6 @@ public class App {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        /*for (User u:listUsers) {
-            System.out.println(u);
-        }*/
-        String json = getJson(listUsers);
-        //System.out.println(json);
-        writeToFile(json);
-        /*System.out.println("----------");
-        String strings = getFileContent();
-        System.out.println(strings);
-        List<User> usersFromFile = getUsersFromJson(strings);
-        for (User u:usersFromFile) {
-            System.out.println(u);
-        }*/
     }
 
     private static String getJson(List<User> listUsers) throws JsonProcessingException {
